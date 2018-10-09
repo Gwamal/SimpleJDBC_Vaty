@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -80,7 +81,27 @@ public class DAO {
 	 * @throws DAOException
 	 */
 	public int numberOfOrdersForCustomer(int customerId) throws DAOException {
-		throw new UnsupportedOperationException("Pas encore implémenté");
+                String nbOrderCustomer = "SELECT COUNT (*) AS nbCommandeClient FROM PURCHASE_ORDER WHERE CUSTOMER_ID = ?";
+                
+                int result = 0;
+                try (Connection connection = myDataSource.getConnection(); // Ouvrir une connexion
+			PreparedStatement stmt = connection.prepareStatement(nbOrderCustomer);   
+			) {
+                    
+                    // Définir la valeur du paramètre
+			stmt.setInt(1, customerId);
+                        
+                        ResultSet rs = stmt.executeQuery(); // On a utilisé customer_id dans la requete                       
+                        if (rs.next()) { // Pas la peine de faire while, il y a 1 seul enregistrement
+                            // On récupère le champ nbCommandeClient de l'enregistrement courant
+                            result = rs.getInt("nbCommandeClient");
+                        }
+                        
+                } catch (SQLException ex){
+                    Logger.getLogger("DAO").log(Level.SEVERE, null, ex);
+		    throw new DAOException(ex.getMessage());
+                }
+                return result;
 	}
 
 	/**
@@ -91,7 +112,29 @@ public class DAO {
 	 * @throws DAOException
 	 */
 	CustomerEntity findCustomer(int customerID) throws DAOException {
-		throw new UnsupportedOperationException("Pas encore implémenté");
+		//throw new UnsupportedOperationException("Pas encore implémenté");
+                String rqtFindCustomer = "SELECT * FROM CUSTOMER WHERE CUSTOMER_ID = ?";
+                CustomerEntity result = new CustomerEntity(0,"null","null"); // CustomerEntity
+                try (Connection connection = myDataSource.getConnection(); // Ouvrir une connexion
+			PreparedStatement stmt = connection.prepareStatement(rqtFindCustomer);   
+			) {
+                    
+                    // Définir la valeur du paramètre
+			stmt.setInt(1, customerID);
+                        ResultSet rs = stmt.executeQuery(); // On a utilisé customer_id dans la requete                       
+                        if (rs.next()) { // Pas la peine de faire while, il y a 1 seul enregistrement
+                            // On récupère les champs de l'enregistrement courant
+                            // On récupere l'id (int), le nom (String), l'adresse (String) dans la bd
+                            result = new CustomerEntity(rs.getInt("CUSTOMER_ID"),
+                                     rs.getString("NAME"),
+                                    (rs.getString("ADDRESSLINE1") + rs.getString("ADDRESSLINE2")));
+                        }
+                        
+                } catch (SQLException ex){
+                    Logger.getLogger("DAO").log(Level.SEVERE, null, ex);
+		    throw new DAOException(ex.getMessage());
+                }
+                return result;
 	}
 
 	/**
@@ -102,7 +145,32 @@ public class DAO {
 	 * @throws DAOException
 	 */
 	List<CustomerEntity> customersInState(String state) throws DAOException {
-		throw new UnsupportedOperationException("Pas encore implémenté");
-	}
+		//throw new UnsupportedOperationException("Pas encore implémenté");
+                String rqtCustomersInState = "SELECT * FROM CUSTOMER WHERE STATE = ?";
+                List<CustomerEntity> listCustomer = new ArrayList<CustomerEntity>();
+                CustomerEntity result = new CustomerEntity(0,"null","null"); // CustomerEntity initialisation par défaut
+                try (Connection connection = myDataSource.getConnection(); // Ouvrir une connexion
+			PreparedStatement stmt = connection.prepareStatement(rqtCustomersInState);   
+			){
+                    // La connexion est effecuté donc on définit la valeur du parametre
+			stmt.setString(1, state);
+                        ResultSet rs = stmt.executeQuery(); // On a utilisé state dans la requete <= requete parametré
+                    while(rs.next()){   // On fait un while pour récuperer les différents clients dans une liste
+                        // On récupere l'id (int), le nom (String), l'adresse (String) dans la bd pour l'objet result
+                        result = new CustomerEntity(rs.getInt("CUSTOMER_ID"),
+                                rs.getString("NAME"),
+                                (rs.getString("ADDRESSLINE1") + rs.getString("ADDRESSLINE2")));
+                        
+                        // On met le résult dans la liste
+                        listCustomer.add(result);
+                    } 
+
+                    
+            } catch (SQLException ex){
+                    Logger.getLogger("DAO").log(Level.SEVERE, null, ex);
+		    throw new DAOException(ex.getMessage());
+            }    
+                return listCustomer;
+        }
 
 }
