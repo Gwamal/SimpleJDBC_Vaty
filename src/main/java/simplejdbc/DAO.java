@@ -76,16 +76,16 @@ public class DAO {
 
 	/**
 	 *
-	 * @param customerId la clé du client à recherche
+	 * @param customerId la clé du client à rechercher
 	 * @return le nombre de bons de commande pour ce client (table PURCHASE_ORDER)
 	 * @throws DAOException
 	 */
 	public int numberOfOrdersForCustomer(int customerId) throws DAOException {
-                String nbOrderCustomer = "SELECT COUNT (*) AS nbCommandeClient FROM PURCHASE_ORDER WHERE CUSTOMER_ID = ?";
+                String nbOrderForCustomer = "SELECT COUNT (*) AS nbCommande FROM PURCHASE_ORDER WHERE CUSTOMER_ID = ?";
                 
                 int result = 0;
                 try (Connection connection = myDataSource.getConnection(); // Ouvrir une connexion
-			PreparedStatement stmt = connection.prepareStatement(nbOrderCustomer);   
+			PreparedStatement stmt = connection.prepareStatement(nbOrderForCustomer);   
 			) {
                     
                     // Définir la valeur du paramètre
@@ -94,7 +94,7 @@ public class DAO {
                         ResultSet rs = stmt.executeQuery(); // On a utilisé customer_id dans la requete                       
                         if (rs.next()) { // Pas la peine de faire while, il y a 1 seul enregistrement
                             // On récupère le champ nbCommandeClient de l'enregistrement courant
-                            result = rs.getInt("nbCommandeClient");
+                            result = rs.getInt("nbCommande");
                         }
                         
                 } catch (SQLException ex){
@@ -106,17 +106,16 @@ public class DAO {
 
 	/**
 	 * Trouver un Customer à partir de sa clé
-	 *
 	 * @param customerID la clé du CUSTOMER à rechercher
 	 * @return l'enregistrement correspondant dans la table CUSTOMER, ou null si pas trouvé
 	 * @throws DAOException
 	 */
 	CustomerEntity findCustomer(int customerID) throws DAOException {
 		//throw new UnsupportedOperationException("Pas encore implémenté");
-                String rqtFindCustomer = "SELECT * FROM CUSTOMER WHERE CUSTOMER_ID = ?";
+                String rechercheClient = "SELECT * FROM CUSTOMER WHERE CUSTOMER_ID = ?";
                 CustomerEntity result = new CustomerEntity(0,"null","null"); // CustomerEntity
                 try (Connection connection = myDataSource.getConnection(); // Ouvrir une connexion
-			PreparedStatement stmt = connection.prepareStatement(rqtFindCustomer);   
+			PreparedStatement stmt = connection.prepareStatement(rechercheClient);   
 			) {
                     
                     // Définir la valeur du paramètre
@@ -139,7 +138,6 @@ public class DAO {
 
 	/**
 	 * Liste des clients localisés dans un état des USA
-	 *
 	 * @param state l'état à rechercher (2 caractères)
 	 * @return la liste des clients habitant dans cet état
 	 * @throws DAOException
